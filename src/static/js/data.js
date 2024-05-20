@@ -5,21 +5,21 @@ const gTestWatchButton = document.getElementById("testWatchButton");
 
 // Controls
 const STATUS_ENUM = Object.freeze({
-  UNKOWN: {
-    text: "Status: Unkown",
+  UNKNOWN: {
+    text: "Unknown",
     color: "#a0a0a0",
   },
   RECEIVING: {
-    text: "Status: Recieving",
+    text: "Recieving",
     color: "#4bd36b",
   },
   STOPPED: {
-    text: "Status: Stoped",
+    text: "Stopped",
     color: "#dc2323",
   },
 });
 const gCurrentStatus = document.getElementById("status");
-updateStatus("UNKOWN");
+updateStatus("UNKNOWN");
 
 // Start and Stop Button Elements
 const gStartButton = document.getElementById("start");
@@ -59,7 +59,7 @@ async function checkWatchConnection(watchID, callback) {
  *                       This key corresponds to an entry in the STATUS_ENUM object.
  */
 function updateStatus(key) {
-  gCurrentStatus.innerHTML = STATUS_ENUM[key].text;
+  gCurrentStatus.innerHTML = STATUS_ENUM[key].text + ": " + (gTaskDropdown.value == "none" ? "?" : gTaskDropdown.value);
   gCurrentStatus.style.color = STATUS_ENUM[key].color;
 }
 

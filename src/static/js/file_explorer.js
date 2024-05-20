@@ -52,7 +52,13 @@ function updateFolderStructure() {
   folders.forEach(async (folder) => {
     const folderData = await getFolderData(`data/${folder}`);
     fileInfoTable[folder] = folderData;
+
+    // Reset html for files
+    const filesElement = document.getElementById(folder);
+    filesElement.innerHTML = "";
+
     folderData.forEach((fileInfo) => {
+      // Fill html with current files
       addFileToFolder(document.getElementById(folder), fileInfo["filename"]);
     });
   });
