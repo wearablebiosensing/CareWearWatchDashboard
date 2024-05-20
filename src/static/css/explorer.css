@@ -1,0 +1,107 @@
+/* Styles for the sliding panel */
+.panel {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  background-color: #2c2c2c;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  transition: 0.5s;
+}
+
+.panel_controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+  height: 50px;
+  padding: 5px 10px;
+}
+
+.folder-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.panel_controls .closebtn {
+  color: #818181;
+  transition: 0.3s;
+  text-decoration: none;
+  font-size: 40px;
+}
+
+.refreshbtn {
+  font-size: 30px !important;
+}
+
+.panel_controls .closebtn:hover {
+  cursor: pointer;
+  color: #f1f1f1;
+}
+
+.folder-structure {
+  padding: 20px;
+  color: white;
+}
+
+.folder {
+  margin-bottom: 20px;
+}
+
+.folder-header {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.folder .arrow {
+  width: 25px;
+  height: 25px;
+  display: inline-block;
+  transition: transform 0.3s;
+}
+
+.folder .folder-icon {
+  width: 25px;
+  height: 25px;
+}
+
+.folder-header.open .arrow {
+  transform: rotate(90deg);
+}
+
+.files {
+  display: none;
+  padding-left: 30px;
+}
+
+.folder-header.open ~ .files {
+  display: flex;
+  flex-direction: column;
+}
+
+.file {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.file .file-icon {
+  width: 10px;
+  height: 10px;
+}
+
+.file .file-name {
+  max-width: 200px; /* Adjust as needed */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

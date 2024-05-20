@@ -1,0 +1,110 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Real-time MQTT Data</title>
+
+    <script src="/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/explorer.css') }}" />
+  </head>
+  <body>
+    <div class="headerInputContainer">
+      <input type="text" id="userIDInput" placeholder="Enter User ID" />
+      <input type="text" id="watchIDInput" placeholder="Enter Watch ID" />
+      <select id="taskDropdownInput">
+        <option selected disabled hidden value="none">Choose Task</option>
+        <option value="VAMS">VAMS</option>
+        <option value="PSS">PSS</option>
+        <option value="PANAS">PANAS</option>
+        <option value="resting">Resting</option>
+        <option value="perparespeech">Prepare Speech</option>
+        <option value="speech">Speech</option>
+        <option value="math">Math</option>
+        <option value="staircase">Staircase</option>
+      </select>
+
+      <div class="vertical-line" style="height: 45px"></div>
+      <div class="testWrapper">
+        <button id="testWatchButton">Test Watch</button>
+        <button onclick="openPanel()">File Explorer</button>
+      </div>
+    </div>
+    <div class="main">
+      <div class="controllBtnContainer">
+        <div id="status">Unkown</div>
+        <button id="start">Start</button>
+        <button id="stop">Stop</button>
+        <select id="graphDropdownInput" class="drop">
+          <!-- <option selected disabled hidden value="none">Choose Graph</option> -->
+          <option value="accelerometer" selected>Acceleration</option>
+          <option value="gyroscope">Gyroscopic</option>
+          <option value="linear_acceleration">Linear Acceleration</option>
+          <option value="heartrate">Heartrate</option>
+        </select>
+      </div>
+      <div class="graphContainer">
+        <canvas id="chart"></canvas>
+      </div>
+    </div>
+
+    <div id="myPanel" class="panel">
+      <div class="panel_controls">
+        <h2>File Explorer</h2>
+        <div class="folder-controls">
+          <a class="closebtn refreshbtn" onclick="updateFolderStructure()">&#8635;</a>
+          <a class="closebtn" onclick="closePanel()">&times;</a>
+        </div>
+      </div>
+      <div class="folder-structure">
+        <div class="folder">
+          <div class="folder-header" onclick="toggleFolder(this)">
+            <img class="arrow" src="{{ url_for('static', filename='img/arrow.png') }}" />
+            <img class="folder-icon" src="{{ url_for('static', filename='img/folder.png') }}" />
+            <div class="folder-name">Gyroscope</div>
+          </div>
+          <div class="files" id="accelerometer"></div>
+        </div>
+        <div class="folder">
+          <div class="folder-header" onclick="toggleFolder(this)">
+            <img class="arrow" src="{{ url_for('static', filename='img/arrow.png') }}" />
+            <img class="folder-icon" src="{{ url_for('static', filename='img/folder.png') }}" />
+            <div class="folder-name">Gyroscope</div>
+          </div>
+          <div class="files" id="gyroscope"></div>
+        </div>
+
+        <div class="folder">
+          <div class="folder-header" onclick="toggleFolder(this)">
+            <img class="arrow" src="{{ url_for('static', filename='img/arrow.png') }}" />
+            <img class="folder-icon" src="{{ url_for('static', filename='img/folder.png') }}" />
+            <div class="folder-name">Linear Acceleration</div>
+          </div>
+          <div class="files" id="linear_acceleration"></div>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="{{ url_for('static', filename='js/data.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/graph.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/file_explorer.js') }}"></script>
+    <script>
+      // Need to keep this inline so the jinja template can work
+      function addFileToFolder(file_list_element, filename) {
+        const file_html = `
+          <div class="file" data-name="${filename}" onclick="displayFileInfo(this)">
+            <img class="folder-icon" src="{{ url_for('static', filename='img/csv.png') }}" />
+            <div class="file-name">${filename}</div>
+          </div>
+          `;
+
+        file_list_element.insertAdjacentHTML("beforeend", file_html);
+      }
+    </script>
+  </body>
+</html>
