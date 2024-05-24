@@ -1,4 +1,5 @@
 function openPanel() {
+  updateFolderStructure();
   if (window.innerWidth <= 800) {
     document.getElementById("myPanel").style.width = "80%";
   } else {
@@ -47,7 +48,7 @@ async function getFolderData(folderPath) {
 let fileInfoTable = {};
 
 function updateFolderStructure() {
-  const folders = ["accelerometer", "gyroscope", "linear_acceleration"];
+  const folders = ["accelerometer", "gyroscope", "linear_acceleration", "heartrate"];
 
   folders.forEach(async (folder) => {
     const folderData = await getFolderData(`data/${folder}`);

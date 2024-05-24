@@ -269,16 +269,16 @@ def get_csv_headers_from_topic(topic: str) -> list[str]|None:
     """
 
     if(topic == "accelerometer"):
-        return ["x(m/s^2)", "y(m/s^2)", "z(m/s^2)", "internal_ts", "watch_timestamp", "relative_timestamp"]
+        return ["x(m/s^2)", "y(m/s^2)", "z(m/s^2)", "internal_ts", "watch_timestamp",]
 
     if(topic == "gyroscope"):
-        return ["x(rad)", "y(rad)", "z(rad)", "internal_ts", "watch_timestamp", "relative_timestamp"]
+        return ["x(rad)", "y(rad)", "z(rad)", "internal_ts", "watch_timestamp"]
 
     if(topic == "heartrate"):
-        return ["bpm", "internal_ts", "watch_timestamp", "relative_timestamp"]
+        return ["bpm", "internal_ts", "watch_timestamp"]
 
     if(topic == "linear_acceleration"):
-        return ["x(m/s^2)", "y(m/s^2)", "z(m/s^2)", "internal_ts", "watch_timestamp", "relative_timestamp"]
+        return ["x(m/s^2)", "y(m/s^2)", "z(m/s^2)", "internal_ts", "watch_timestamp"]
     
     return None
         

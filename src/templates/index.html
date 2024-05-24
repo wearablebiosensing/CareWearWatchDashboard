@@ -15,14 +15,17 @@
   <body>
     <div class="headerInputContainer">
       <input type="text" id="userIDInput" placeholder="Enter User ID" />
-      <input type="text" id="watchIDInput" placeholder="Enter Watch ID" />
+      <input type="text" id="watchIDInput" placeholder="Enter Watch ID" autocorrect="off" autocapitalize="none" />
       <select id="taskDropdownInput">
         <option selected disabled hidden value="none">Choose Task</option>
+        <option value="VAMS">EMA</option>
         <option value="VAMS">VAMS</option>
         <option value="PSS">PSS</option>
         <option value="PANAS">PANAS</option>
-        <option value="resting">Resting</option>
-        <option value="perparespeech">Prepare Speech</option>
+        <option value="resting1">Resting</option>
+        <option value="resting2">Resting2</option>
+        <option value="resting3">Resting3</option>
+        <option value="perpare_speech">Prepare Speech</option>
         <option value="speech">Speech</option>
         <option value="math">Math</option>
         <option value="staircase">Staircase</option>
@@ -85,6 +88,15 @@
             <div class="folder-name">Linear Acceleration</div>
           </div>
           <div class="files" id="linear_acceleration"></div>
+        </div>
+
+        <div class="folder">
+          <div class="folder-header" onclick="toggleFolder(this)">
+            <img class="arrow" src="{{ url_for('static', filename='img/arrow.png') }}" />
+            <img class="folder-icon" src="{{ url_for('static', filename='img/folder.png') }}" />
+            <div class="folder-name">Heartrate</div>
+          </div>
+          <div class="files" id="heartrate"></div>
         </div>
       </div>
     </div>
