@@ -25,6 +25,32 @@ updateStatus("UNKNOWN");
 const gStartButton = document.getElementById("start");
 const gStopButton = document.getElementById("stop");
 
+window.addEventListener("load", async (event) => {
+  // Setup watchID stuff
+  gWatchIDInput.value = localStorage.getItem(CAREWEAR_WATCHID_LS) == null ? "" : localStorage.getItem(CAREWEAR_WATCHID_LS);
+  gWatchIDInput.addEventListener("change", (e) => {
+    localStorage.setItem(CAREWEAR_WATCHID_LS, e.target.value);
+  });
+
+  // Setup userID stuff
+  gUserIDInput.value = localStorage.getItem(CAREWEAR_USERID_LS) == null ? "" : localStorage.getItem(CAREWEAR_USERID_LS);
+  gUserIDInput.addEventListener("change", (e) => {
+    localStorage.setItem(CAREWEAR_USERID_LS, e.target.value);
+  });
+
+  gTaskDropdown.value = localStorage.getItem(CAREWEAR_TASK_LS) == null ? "" : localStorage.getItem(CAREWEAR_TASK_LS);
+  gTaskDropdown.addEventListener("change", (e) => {
+    localStorage.setItem(CAREWEAR_TASK_LS, e.target.value);
+  });
+
+  await checkAlreadyCollectingData(getWatchID(), (isAlreadyCollecting, msg) => {
+    if (isAlreadyCollecting) {
+      updateStatus("RECEIVING");
+      startChart();
+    }
+  });
+});
+
 /**
  * Asynchronously checks the connection status of a specified watch.
  *
@@ -47,6 +73,24 @@ async function checkWatchConnection(watchID, callback) {
     const isWatchConnected = data["status"] == "online";
     const message = data["msg"];
     callback(isWatchConnected, message);
+  } catch {
+    callback(false, "Something went wrong");
+  }
+}
+
+async function checkAlreadyCollectingData(watchID, callback) {
+  try {
+    const res = await fetch(`/is_already_collecting?watchID=${watchID}`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    const data = await res.json();
+    const isAlreadyCollecting = data["status"] == "collecting";
+    const message = data["msg"];
+    callback(isAlreadyCollecting, message);
   } catch {
     callback(false, "Something went wrong");
   }
@@ -82,37 +126,6 @@ function startButtonLoading(button_element) {
 function stopButtonLoading(button_element, original_text) {
   button_element.innerHTML = original_text;
   button_element.disabled = false;
-}
-
-function showToast(message, type) {
-  let backgroundColor;
-  switch (type) {
-    case "success":
-      backgroundColor = "linear-gradient(to right, #00b09b, #96c93d)";
-      break;
-    case "error":
-      backgroundColor = "linear-gradient(to right, #ff5f6d, #ee6666)";
-      break;
-    case "info":
-      backgroundColor = "linear-gradient(to right, #3498db, #2ecc71)";
-      break;
-    default:
-      backgroundColor = "linear-gradient(to right, #bdc3c7, #2c3e50)";
-  }
-
-  Toastify({
-    text: message,
-    duration: 5000,
-    close: true,
-    gravity: "top", // `top` or `bottom`
-    position: "left", // `left`, `center` or `right`
-    backgroundColor: backgroundColor,
-    className: "custom-toast",
-    style: {
-      fontSize: "1.1em",
-      padding: "12px",
-    },
-  }).showToast();
 }
 
 // Event Listeners
@@ -185,9 +198,15 @@ gStartButton.addEventListener("click", () => {
       .then((data) => {
         const isDataCollectionStarted = data["status"] == "success";
         const msg = data["msg"];
+
+        if (data["status"] == "noaction") {
+          showToast(msg, "error");
+          return;
+        }
         if (isDataCollectionStarted) {
           showToast(msg, "success");
           updateStatus("RECEIVING");
+          startChart();
         } else {
           showToast(msg, "error");
           updateStatus("UNKNOWN");
@@ -195,7 +214,7 @@ gStartButton.addEventListener("click", () => {
       })
       .finally(() => {
         // Stop Loading
-        stopButtonLoading(gStartButton, "Test Watch");
+        stopButtonLoading(gStartButton, "Start");
       });
   });
 });

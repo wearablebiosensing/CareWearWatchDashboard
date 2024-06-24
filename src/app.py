@@ -12,6 +12,8 @@ app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
 
 
+# In-memory storage for session states and clients
+mqtt_clients = {}
 
 
 @app.route('/')
@@ -24,12 +26,20 @@ def index():
 # TODO - MAKE SURE TO RUN WITH 'python app.py' NOT 'flask run' since it does not start the socketio
 
 MQTT_BROKER = "broker.hivemq.com"
+# MQTT_BROKER = "broker.emqx.io"
 MQTT_PORT = 1883
-mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
+# mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
 
-def connect_mqtt():
-    mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
-    mqtt_client.loop_start()
+# def connect_mqtt():
+#     mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
+#     mqtt_client.loop_start()
+    
+    
+def connect_mqtt(client_id):
+    client = mqtt.Client(client_id)
+    client.connect(MQTT_BROKER, MQTT_PORT, 60)
+    client.loop_start()
+    return client
 
 @app.route('/socket.io.js')
 def socketio_js():
@@ -66,7 +76,18 @@ def get_folder_data():
     
     return make_response(jsonify({'status': "success", 'msg': "Sent Folder Data", "data": fileData}))
         
-        
+
+@app.route('/is_already_collecting', methods=['POST'])
+def is_already_collecting():
+    watchID: str|None = request.args.get("watchID", None)
+    if watchID == None:
+        return make_response(jsonify({'status': "offline", 'msg': "Error: Watch ID not Provided"}))
+    
+    alreadyConnected = False if mqtt_clients.get(watchID, None) == None else True
+    if alreadyConnected:
+        return make_response(jsonify({'status': "collecting", 'msg': f"Already Connecting Data: {watchID}"}))
+    else:
+        return make_response(jsonify({'status': "offline", 'msg': f"Not Connecting Data: {watchID}"}))
 
 
 @app.route('/check_watch_connection', methods=['POST'])
@@ -98,8 +119,16 @@ def start_data_collection():
     task: str|None = request.args.get("task", None)
     if task == None:
         return make_response(jsonify({'status': "failure", 'msg': "Error: Task not Provided"}))
-
-    startMQTTCollection(userID, watchID, task)
+    
+    alreadyConnected = False if mqtt_clients.get(watchID, None) == None else True
+    if alreadyConnected:
+        return make_response(jsonify({'status': "noaction", 'msg': f"Already started collecting data for {watchID}"}))
+        
+    
+    # client_id = f"{userID}_{watchID}"
+    mqtt_client =  mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
+    mqtt_clients[watchID] = mqtt_client
+    startMQTTCollection(userID, watchID, task, mqtt_client)
     
     return make_response(jsonify({'status': "success", 'msg': f"Connected to MQTT Topics: {watchID}"}))        
 
@@ -110,7 +139,12 @@ def stop_data_collection():
     if watchID == None:
         return make_response(jsonify({'status': "failure", 'msg': "Error: Watch ID not Provided"}))
     
-    stopMQTTCollection(watchID)
+    if watchID in mqtt_clients.keys():
+        stopMQTTCollection(watchID, mqtt_clients[watchID])
+        del mqtt_clients[watchID]
+    else:
+        return make_response(jsonify({'status': "failure", 'msg': "Internal Server Error: MQTT client not found in memory"}))
+    
     
     return make_response(jsonify({'status': "success", 'msg': f"Disconnected From MQTT Topics: {watchID}"}))        
 
@@ -151,7 +185,7 @@ def checkWatchConnection(watch_id: str, timeout=5) -> bool:
 
 
 
-def stopMQTTCollection(watchID):
+def stopMQTTCollection(watchID, mqtt_client):
 
     print(f"Stopping {watchID}")
     
@@ -165,8 +199,11 @@ def stopMQTTCollection(watchID):
     for topic in topics:
         print(f"Stopping listening on {topic}")
         mqtt_client.unsubscribe(topic)
+        
 
-def startMQTTCollection(userID: str, watchID: str, task: str) -> None:
+def startMQTTCollection(userID: str, watchID: str, task: str, mqtt_client) -> None:
+    mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
+    mqtt_client.loop_start()
     
     files_timestamp = int(time.time())
     file_prefix = f"{userID}_{task}_{watchID}_{files_timestamp}"
@@ -188,6 +225,12 @@ def startMQTTCollection(userID: str, watchID: str, task: str) -> None:
 # Callback for when the client receives a CONNACK response from the server
 def on_connect(client, userdata, flags, rc, watchID):
     if rc == 0:
+        
+        mqtt_client = mqtt_clients.get(watchID, None)
+        if mqtt_clients == None:
+            print("ERROR (on_connect): MQTT client not found in memory")
+            return
+        
         # Subscribe to multiple topics based on the watch ID
         topics = [
             f"{watchID}/accelerometer",
@@ -203,6 +246,7 @@ def on_connect(client, userdata, flags, rc, watchID):
         
         
 def on_message(client, userdata, message, watchID: str, file_prefix: str):
+    print(f"Message: {watchID}")
     topic = message.topic
     data_type = topic.split("/")[1]
     
@@ -212,7 +256,7 @@ def on_message(client, userdata, message, watchID: str, file_prefix: str):
     full_filename = f"{file_prefix}_{data_type}"
     # print(batch_data, type(batch_data))
     saveToCSV(data_type, full_filename, data_type, batch_data)
-    sendToChart(data_type, batch_data)
+    sendToChart(data_type, batch_data, watchID)
     
     
     
@@ -248,12 +292,12 @@ def saveToCSV(folder: str, filename: str, topic: str, batchData: list[str]) -> N
         csv_writer.writerows(csv_data)
         
         
-def sendToChart(data_type: str, batch_data: list[str]):
+def sendToChart(data_type: str, batch_data: list[str], watchID: str):
     for line in batch_data:
         data = line.split(",")
         ax = data[0]
         ax_float_value = float(ax)
-        socketio.emit(f'mqtt_data_{data_type}', {'data': ax_float_value})
+        socketio.emit(f'mqtt_data_{data_type}_{watchID}', {'data': ax_float_value})
 
 
 
@@ -357,5 +401,5 @@ def get_csv_headers_from_topic(topic: str) -> list[str]|None:
 
 
 if __name__ == '__main__':
-    connect_mqtt()  # Ensure MQTT connection is established
+    # connect_mqtt()  # Ensure MQTT connection is established
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)

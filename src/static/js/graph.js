@@ -13,7 +13,34 @@ gGraphDropdownInput.addEventListener("change", () => {
   }
 
   initializeChart(gGraphDropdownInput.value, maxDataPoints);
+  startChart(gGraphDropdownInput.value);
 });
+
+function startChart() {
+  const watchID = getWatchID();
+  if (watchID == null) {
+    showToast("Cannot show chart as WatchID is not provided ", "info");
+    return;
+  }
+
+  const canvasId = document.getElementById("graphDropdownInput").value;
+
+  currentListener = "mqtt_data_" + canvasId + "_" + watchID;
+  socket.on(currentListener, function (msg) {
+    var time = new Date().toLocaleTimeString();
+    if (chart.data.labels.length >= maxDataPoints) {
+      chart.data.labels.shift(); // Remove the oldest label
+      chart.data.datasets.forEach((dataset) => {
+        dataset.data.shift(); // Remove the oldest data point
+      });
+    }
+    chart.data.labels.push(time);
+    chart.data.datasets.forEach((dataset) => {
+      dataset.data.push(msg.data);
+    });
+    chart.update();
+  });
+}
 
 function setupCharts() {
   // Initialize charts for each canvas
@@ -77,20 +104,26 @@ function initializeChart(canvasId, maxDataPoints) {
       },
     },
   });
+  chart.update();
 
-  currentListener = "mqtt_data_" + canvasId;
-  socket.on(currentListener, function (msg) {
-    var time = new Date().toLocaleTimeString();
-    if (chart.data.labels.length >= maxDataPoints) {
-      chart.data.labels.shift(); // Remove the oldest label
-      chart.data.datasets.forEach((dataset) => {
-        dataset.data.shift(); // Remove the oldest data point
-      });
-    }
-    chart.data.labels.push(time);
-    chart.data.datasets.forEach((dataset) => {
-      dataset.data.push(msg.data);
-    });
-    chart.update();
-  });
+  // const watchID = getWatchID();
+  // if (watchID == null) {
+  //   showToast("Cannot show chart as WatchID is not provided ", "info");
+  // }
+
+  // currentListener = "mqtt_data_" + canvasId + "_" + watchID;
+  // socket.on(currentListener, function (msg) {
+  //   var time = new Date().toLocaleTimeString();
+  //   if (chart.data.labels.length >= maxDataPoints) {
+  //     chart.data.labels.shift(); // Remove the oldest label
+  //     chart.data.datasets.forEach((dataset) => {
+  //       dataset.data.shift(); // Remove the oldest data point
+  //     });
+  //   }
+  //   chart.data.labels.push(time);
+  //   chart.data.datasets.forEach((dataset) => {
+  //     dataset.data.push(msg.data);
+  //   });
+  //   chart.update();
+  // });
 }
