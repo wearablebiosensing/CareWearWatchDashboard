@@ -28,11 +28,9 @@ def index():
 MQTT_BROKER = "broker.hivemq.com"
 # MQTT_BROKER = "broker.emqx.io"
 MQTT_PORT = 1883
-# mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
 
-# def connect_mqtt():
-#     mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
-#     mqtt_client.loop_start()
+
+
     
     
 def connect_mqtt(client_id):
@@ -246,7 +244,7 @@ def on_connect(client, userdata, flags, rc, watchID):
         
         
 def on_message(client, userdata, message, watchID: str, file_prefix: str):
-    print(f"Message: {watchID}")
+    # print(f"Message: {watchID}")
     topic = message.topic
     data_type = topic.split("/")[1]
     
@@ -326,77 +324,7 @@ def get_csv_headers_from_topic(topic: str) -> list[str]|None:
     
     return None
         
-# def on_message(client, userdata, message, filename, watchID):
-#     try:
-#         topic_base = message.topic.split('/')[1]  # Extracts 'acceleration' or 'gyro' from the topic
-#         directory = f"watch_data/{topic_base}_data/"  # Creates directory path based on topic
-#         full_filename = f"{filename}_{topic_base}"  # Appends topic to the filename
 
-#         data = message.payload.decode()
-#         save_to_csv(data, directory, full_filename, watchID, get_csv_headers_from_topic(topic_base))
-#     except Exception as e:
-#         print(f"Error processing mqtt message: {e}")
-
-
-
-
-# # Function to save data to CSV
-# def save_to_csv(data, dir, filename, watchID, header=None):
-#     # Correct directory name
-#     directory = os.path.join(SAVED_DATA_DIRECTORY, dir)
-    
-#     os.makedirs(directory, exist_ok=True)
-
-#     # Correct file path
-#     file_path = os.path.join(directory, f"{filename}.csv")
-
-#     # Check if file exists before opening it
-#     file_exists = os.path.exists(file_path)
-    
-    
-#     relative_timestamp = 0
-#     # == Relative Timestamp == Initialize start_time if it's the first message
-#     if mqtt_clients[watchID]["start_time"] is None:
-#         mqtt_clients[watchID]["start_time"] = time.time()
-#     else:
-#         # Calculate relative timestamp
-#         relative_timestamp = time.time() - mqtt_clients[watchID]["start_time"]
-        
-#     print(relative_timestamp)
-
-#     with open(file_path, "a", newline='') as csv_file:
-#         csv_writer = csv.writer(csv_file)
-
-#         # Write the header only if the file did not exist and a header is provided
-#         if not file_exists and header is not None:
-#             csv_writer.writerow(header)
-
-#         # Splite the gitant string blob into each row, still also just a big string
-#         rows = data.split('\n')
-        
-        
-#         # 2D array each row is a row for csv
-#         # Each column is a entry in each row
-#         csv_data = [row.split(',') for row in rows]
-        
-#         for row in csv_data:
-#             row.append(str(relative_timestamp))
-
-#         csv_writer.writerows(csv_data)
-        
-#     return file_path
-
-#     # print(f"Data saved in CSV file: {file_path}")
-
-# # Modified function to start data collection for specific user
-# def start_data_collection(level, sub_level, userID, filename, watchID):
-#     # Create a new MQTT client for the user
-#     client = mqtt.Client()
-
-#     # Set up callbacks
-#     client.on_connect = partial(on_connect, watchID=watchID)
-#     client.on_message = partial(on_message, filename=filename, watchID=watchID)
-#     client.on_disconnect = on_disconnect
     
 
 
