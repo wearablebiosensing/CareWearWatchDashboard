@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, make_response
+from flask import Flask, render_template, request, jsonify, make_response,session
 from flask_socketio import SocketIO
 import paho.mqtt.client as mqtt
 import time
@@ -14,13 +14,102 @@ socketio = SocketIO(app)
 
 # In-memory storage for session states and clients
 mqtt_clients = {}
+# You can let the user set this directory via an environment variable or however you prefer.
+# For example, set the environment variable CSV_DIR="/path/to/csv/folder"
+CSV_DIR = os.environ.get("CSV_DIR", "./app_data")  # Defaults to current directory if not set
 
+# Define the tasks with both an ID (used internally) and a descriptive name (saved to CSV)
+TASKS = [
+    {"id": "R1",  "name": "Rest1"},
+    {"id": "PS",  "name": "PrepareSpeech"},
+    {"id": "GS",  "name": "GiveSpeech"},
+    {"id": "R2",  "name": "Rest2"},
+    {"id": "MM",  "name": "MentalMath"},
+    {"id": "R3",  "name": "Rest3"},
+    {"id": "SBL", "name": "Stationary_Bike_Legs"},
+    {"id": "SBH", "name": "Stationary_Bike_Hands"}
+]
+
+# In-memory dictionaries for start and stop times
+start_times = {}
+stop_times = {}
+
+# @app.route('/', methods=['GET', 'POST'])
+# def index():
+
+@app.route('/start/<task_id>', methods=['POST'])
+def start_task(task_id):
+    """
+    Record the start time for a task if not already recorded.
+    """
+    if task_id not in start_times:
+        start_times[task_id] = datetime.datetime.now()
+    return redirect(url_for('activity_logger'))
+
+@app.route('/stop/<task_id>', methods=['POST'])
+def stop_task(task_id):
+    """
+    Record the stop time for a task (if it has a start time and hasn't been stopped yet),
+    then append to the CSV file named {participant_id}_activity_times.csv.
+    """
+    if task_id in start_times and task_id not in stop_times:
+        stop_times[task_id] = datetime.datetime.now()
+
+        # Convert times to the desired format, e.g. "1:55 PM"
+        start_str = start_times[task_id].strftime("%I:%M %p")
+        stop_str = stop_times[task_id].strftime("%I:%M %p")
+
+        # Find the descriptive task name to store in CSV
+        task_name = next((t["name"] for t in TASKS if t["id"] == task_id), task_id)
+
+        # Get participant ID from session; default to "unknown" if not set
+        participant_id = session.get('participant_id', 'unknown')
+        
+        # Construct the CSV file name based on participant ID
+        csv_filename = f"{participant_id}_activity_times.csv"
+        csv_path = os.path.join(CSV_DIR, csv_filename)
+
+        # Check if the file already exists (to decide whether to write header)
+        file_exists = os.path.isfile(csv_path)
+
+        with open(csv_path, mode='a', newline='') as f:
+            writer = csv.writer(f, delimiter='\t')
+            if not file_exists:
+                writer.writerow(["task", "start_time", "stop_time"])
+            writer.writerow([task_name, start_str, stop_str])
+
+    return redirect(url_for('activity_logger'))
 
 @app.route('/')
 def index():
     return render_template('index.html')
+@app.route('/sensor_data')
+def sensor_data():
+    return render_template('sensor_data.html')
 
+@app.route('/activity_logger', methods=['GET', 'POST'])
+def activity_logger():
+    """
+    Main page:
+    1. Displays a form to set the Participant ID (stored in session).
+    2. Displays Start/Stop buttons for each activity.
+    """
+    if request.method == 'POST':
+        # If the user submitted the Participant ID form
+        participant_id = request.form.get('participant_id', '').strip()
+        if participant_id:
+            session['participant_id'] = participant_id
 
+    # Get the participant ID from the session (if any)
+    participant_id = session.get('participant_id', '')
+
+    return render_template(
+        'activity_logger.html',
+        tasks=TASKS,
+        start_times=start_times,
+        stop_times=stop_times,
+        participant_id=participant_id
+    )
 
 # MQTT Related Stuff
 # TODO - MAKE SURE TO RUN WITH 'python app.py' NOT 'flask run' since it does not start the socketio
@@ -29,10 +118,6 @@ MQTT_BROKER = "broker.hivemq.com"
 # MQTT_BROKER = "broker.emqx.io"
 MQTT_PORT = 1883
 
-
-
-    
-    
 def connect_mqtt(client_id):
     client = mqtt.Client(client_id)
     client.connect(MQTT_BROKER, MQTT_PORT, 60)
@@ -253,6 +338,7 @@ def on_message(client, userdata, message, watchID: str, file_prefix: str):
 
     full_filename = f"{file_prefix}_{data_type}"
     # print(batch_data, type(batch_data))
+    print(data_type, full_filename, data_type, batch_data)
     saveToCSV(data_type, full_filename, data_type, batch_data)
     sendToChart(data_type, batch_data, watchID)
     

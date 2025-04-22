@@ -1,0 +1,248 @@
+{% extends "index.html" %}
+{% block title %} Activity Logger {% endblock %}
+{% block content %}
+<h1>Welcome to the Activity Logger Page!</h1>
+<head>
+    <meta charset="utf-8">
+    <title>Activity Recorder</title>
+    <style>
+      /* Overall page styling */
+      body {
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        font-size: 16px;
+        color: #333;
+        margin: 0;
+        padding: 0;
+        background-color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+      }
+      /* Navigation Bar */
+      nav {
+        width: 100%;
+        background-color: #2F80ED;
+        padding: 10px 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+      nav ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+      }
+      nav ul li {
+        margin: 0 15px;
+      }
+      nav ul li a {
+        color: #fff;
+        text-decoration: none;
+        font-size: 18px;
+        font-weight: 500;
+        transition: color 0.3s ease;
+      }
+      nav ul li a:hover {
+        color: #cce4ff;
+      }
+      .container {
+        text-align: center;
+        width: 90%;
+        max-width: 800px;
+        margin: auto;
+        padding: 20px;
+      }
+      h1 {
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #2F80ED;
+      }
+      .participant-form {
+        margin-bottom: 20px;
+      }
+      .participant-form label {
+        margin-right: 10px;
+        font-size: 18px;
+        font-weight: 500;
+      }
+      .participant-form input {
+        padding: 8px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        width: 200px;
+        margin-right: 10px;
+      }
+      .participant-form button {
+        padding: 8px 16px;
+        font-size: 16px;
+        border: none;
+        border-radius: 4px;
+        background-color: #2F80ED;
+        color: #fff;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      .participant-form button:hover {
+        background-color: #1c5bbf;
+      }
+      /* Layout for activity buttons */
+      .activity-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 40px;
+        margin-top: 30px;
+        flex-wrap: wrap;
+      }
+      .column {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+      /* Button styling */
+      .btn {
+        font-size: 18px;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.1s ease;
+      }
+      .btn:hover:not(.disabled) {
+        transform: scale(1.02);
+      }
+      .btn.start-enabled {
+        background-color: #2F80ED; /* Blue */
+        color: #FFFFFF;
+      }
+      .btn.stop-enabled {
+        background-color: #2F80ED; /* Blue for active stop */
+        color: #FFFFFF;
+      }
+      .btn.disabled {
+        background-color: #F2F2F2; /* Gray */
+        color: #666;
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div class="container">
+        <h1>Activity Recorder</h1>
+    
+        <!-- Participant ID Form -->
+        <form class="participant-form" method="POST">
+          <label for="participant_id">Participant ID:</label>
+          <input type="text" name="participant_id" id="participant_id" value="{{ participant_id }}">
+          <button type="submit">Set ID</button>
+        </form>
+    
+        {% if participant_id %}
+        <p><strong>Current Participant ID:</strong> {{ participant_id }}</p>
+        {% else %}
+        <p><em>Please enter a Participant ID above.</em></p>
+        {% endif %}
+    
+        <div class="activity-container">
+          <!-- START buttons on the left column -->
+          <div class="column">
+            {% for task in tasks %}
+            <form action="{{ url_for('start_task', task_id=task.id) }}" method="post" class="start-form">
+              {% set started = task.id in start_times %}
+              {% set stopped = task.id in stop_times %}
+              {% if started or stopped %}
+                <button type="submit"
+                        class="btn disabled start-button"
+                        data-task-id="{{ task.id }}"
+                        disabled>
+                  Start {{ task.id }}
+                </button>
+              {% else %}
+                <button type="submit"
+                        class="btn start-enabled start-button"
+                        data-task-id="{{ task.id }}">
+                  Start {{ task.id }}
+                </button>
+              {% endif %}
+            </form>
+            {% endfor %}
+          </div>
+    
+          <!-- STOP buttons on the right column -->
+          <div class="column">
+            {% for task in tasks %}
+            <form action="{{ url_for('stop_task', task_id=task.id) }}" method="post" class="stop-form">
+              {% set started = task.id in start_times %}
+              {% set stopped = task.id in stop_times %}
+              {% if started and not stopped %}
+                <button type="submit"
+                        class="btn stop-enabled"
+                        id="stop-{{ task.id }}">
+                  Stop {{ task.id }}
+                </button>
+              {% else %}
+                <button type="submit"
+                        class="btn disabled"
+                        id="stop-{{ task.id }}"
+                        disabled>
+                  Stop {{ task.id }}
+                </button>
+              {% endif %}
+            </form>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    
+      <script>
+        // Attach click event listeners to all start buttons.
+        document.querySelectorAll('.start-button').forEach(function(button) {
+          button.addEventListener('click', function(e) {
+            // Prevent the default form submission to update UI immediately.
+            e.preventDefault();
+            
+            const taskId = this.getAttribute('data-task-id');
+    
+            // Immediately disable the start button so it cannot be clicked again.
+            this.disabled = true;
+            this.classList.remove('start-enabled');
+            this.classList.add('disabled');
+    
+            // Update the corresponding stop button: remove disabled styling and enable it.
+            const stopButton = document.getElementById('stop-' + taskId);
+            if (stopButton) {
+              stopButton.disabled = false;
+              stopButton.classList.remove('disabled');
+              stopButton.classList.add('stop-enabled');  // Now blue
+            }
+    
+            // Now submit the start form via fetch.
+            const form = this.closest('form');
+            const url = form.getAttribute('action');
+    
+            fetch(url, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+              },
+              body: ""
+            })
+            .then(function(response) {
+              // Optionally, handle the server response.
+              // In this example, we reload the page to synchronize with the server.
+              window.location.reload();
+            })
+            .catch(function(error) {
+              console.error('Error:', error);
+            });
+          });
+        });
+      </script>
+        </body>
+{% endblock %}
+
