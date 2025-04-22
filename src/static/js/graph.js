@@ -61,7 +61,7 @@ function initializeChart(canvasId, maxDataPoints) {
           label: `${canvasId}`,
           data: [],
           borderWidth: 1,
-          borderColor: "#4CAF50", // Chart line color
+          borderColor: "#79DDE6", // Chart line color
           backgroundColor: "transparent",
         },
       ],
@@ -70,7 +70,7 @@ function initializeChart(canvasId, maxDataPoints) {
       scales: {
         x: {
           ticks: {
-            color: "#ffffff", // Tick label color
+            color: "#79DDE6", // Tick label color
           },
           grid: {
             drawOnChartArea: false,
@@ -85,13 +85,13 @@ function initializeChart(canvasId, maxDataPoints) {
             color: "#37474F",
           },
           ticks: {
-            color: "#ffffff",
+            color: "#000000",
           },
         },
       },
       legend: {
         labels: {
-          fontColor: "#ffffff", // Adjust legend label color for dark theme
+          fontColor: "#000000", // Adjust legend label color for dark theme
         },
       },
       elements: {

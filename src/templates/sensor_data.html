@@ -2,14 +2,14 @@
 {% block title %} Activity Logger {% endblock %}
 {% block content %}
 
-<head>
+<!-- <head>
     <script src="/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/explorer.css') }}" />
     
-</head>
+</head> -->
 
 <body>
 <div class="headerInputContainer">
@@ -17,18 +17,15 @@
     <input type="text" id="watchIDInput" placeholder="Enter Watch ID" autocorrect="off" autocapitalize="none" />
     <select id="taskDropdownInput">
       <option selected disabled hidden value="none">Choose Task</option>
-      <option value="VAMS">EMA</option>
-      <option value="VAMS">VAMS</option>
-      <option value="PSS">PSS</option>
-      <option value="PANAS">PANAS</option>
-      <option value="resting1">Resting</option>
-      <option value="resting2">Resting2</option>
-      <option value="resting3">Resting3</option>
+      <option value="resting1">Rest1</option>
+      <option value="resting2">Rest2</option>
+      <option value="resting3">Rest3</option>
       <option value="perpare_speech">Prepare Speech</option>
-      <option value="speech">Speech</option>
-      <option value="math">Math</option>
-      <option value="staircase">Staircase</option>
-      <option value="bike">Bike</option>
+      <option value="give_speech">Give Speech</option>
+      <option value="math">Mental Math</option>
+      <option value="bike1">Stationary Bike Legs</option>
+      <option value="bike2">Stationary Bike Hands</option>
+      
     </select>
 
     <div class="vertical-line" style="height: 45px"></div>

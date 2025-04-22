@@ -1,0 +1,122 @@
+   /* Overall page styling */
+   /* body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 16px;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  } */
+  /* Navigation Bar */
+  nav {
+    width: 100%;
+    background-color: #2F80ED;
+    padding: 10px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+  }
+  nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+  }
+  nav ul li {
+    margin: 0 15px;
+  }
+  nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: 500;
+    transition: color 0.3s ease;
+  }
+  nav ul li a:hover {
+    color: #cce4ff;
+  }
+  .container {
+    text-align: center;
+    width: 90%;
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+  }
+  h1 {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #2F80ED;
+  }
+  .participant-form {
+    margin-bottom: 20px;
+  }
+  .participant-form label {
+    margin-right: 10px;
+    font-size: 18px;
+    font-weight: 500;
+  }
+  .participant-form input {
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 200px;
+    margin-right: 10px;
+  }
+  .participant-form button {
+    padding: 8px 16px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    background-color: #2F80ED;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  .participant-form button:hover {
+    background-color: #1c5bbf;
+  }
+  /* Layout for activity buttons */
+  .activity-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+  }
+  .column {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  /* Button styling */
+  .btn {
+    font-size: 18px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+  }
+  .btn:hover:not(.disabled) {
+    transform: scale(1.02);
+  }
+  .btn.start-enabled {
+    background-color: #2F80ED; /* Blue */
+    color: #FFFFFF;
+  }
+  .btn.stop-enabled {
+    background-color: #2F80ED; /* Blue for active stop */
+    color: #FFFFFF;
+  }
+  .btn.disabled {
+    background-color: #F2F2F2; /* Gray */
+    color: #666;
+    cursor: not-allowed;
+  }

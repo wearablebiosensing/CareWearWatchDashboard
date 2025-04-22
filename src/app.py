@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request, jsonify, make_response,session
+from flask import Flask, render_template, request, jsonify, make_response,session,redirect,url_for
 from flask_socketio import SocketIO
 import paho.mqtt.client as mqtt
 import time
 import os
 import functools
 import csv
+import datetime
 from typing import List
 
 app = Flask(__name__)
@@ -16,7 +17,7 @@ socketio = SocketIO(app)
 mqtt_clients = {}
 # You can let the user set this directory via an environment variable or however you prefer.
 # For example, set the environment variable CSV_DIR="/path/to/csv/folder"
-CSV_DIR = os.environ.get("CSV_DIR", "./app_data")  # Defaults to current directory if not set
+CSV_DIR = os.environ.get("CSV_DIR", "./data")  # Defaults to current directory if not set
 
 # Define the tasks with both an ID (used internally) and a descriptive name (saved to CSV)
 TASKS = [
