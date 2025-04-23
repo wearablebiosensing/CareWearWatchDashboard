@@ -1,4 +1,8 @@
 var socket = io.connect("http://" + document.domain + ":" + location.port);
+console.log(" SOCKET CONNECTION:==== ",document.domain);
+console.log(" SOCKET CONNECTION:==== ",document.data);
+console.log(" SOCKET CONNECTION:==== ",location.port);
+
 const maxDataPoints = 300; // Maximum data points to display on each chart
 
 let chart = null;

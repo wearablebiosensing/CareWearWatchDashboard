@@ -34,19 +34,20 @@
       <button onclick="openPanel()">File Explorer</button>
     </div>
   </div>
+  <div class="controllBtnContainer">
+    <div id="status">Unkown</div>
+    <button id="start">Start</button>
+    <button id="stop">Stop</button>
+    <select id="graphDropdownInput" class="drop">
+      <!-- <option selected disabled hidden value="none">Choose Graph</option> -->
+      <option value="accelerometer" selected>Acceleration</option>
+      <option value="gyroscope">Gyroscopic</option>
+      <option value="linear_acceleration">Linear Acceleration</option>
+      <option value="heartrate">Heartrate</option>
+    </select>
+  </div>
   <div class="main">
-    <div class="controllBtnContainer">
-      <div id="status">Unkown</div>
-      <button id="start">Start</button>
-      <button id="stop">Stop</button>
-      <select id="graphDropdownInput" class="drop">
-        <!-- <option selected disabled hidden value="none">Choose Graph</option> -->
-        <option value="accelerometer" selected>Acceleration</option>
-        <option value="gyroscope">Gyroscopic</option>
-        <option value="linear_acceleration">Linear Acceleration</option>
-        <option value="heartrate">Heartrate</option>
-      </select>
-    </div>
+ 
     <div class="graphContainer">
       <canvas id="chart"></canvas>
     </div>
