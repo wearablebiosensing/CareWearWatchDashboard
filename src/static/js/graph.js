@@ -13,34 +13,7 @@ gGraphDropdownInput.addEventListener("change", () => {
   }
 
   initializeChart(gGraphDropdownInput.value, maxDataPoints);
-  startChart(gGraphDropdownInput.value);
 });
-
-function startChart() {
-  const watchID = getWatchID();
-  if (watchID == null) {
-    showToast("Cannot show chart as WatchID is not provided ", "info");
-    return;
-  }
-
-  const canvasId = document.getElementById("graphDropdownInput").value;
-
-  currentListener = "mqtt_data_" + canvasId + "_" + watchID;
-  socket.on(currentListener, function (msg) {
-    var time = new Date().toLocaleTimeString();
-    if (chart.data.labels.length >= maxDataPoints) {
-      chart.data.labels.shift(); // Remove the oldest label
-      chart.data.datasets.forEach((dataset) => {
-        dataset.data.shift(); // Remove the oldest data point
-      });
-    }
-    chart.data.labels.push(time);
-    chart.data.datasets.forEach((dataset) => {
-      dataset.data.push(msg.data);
-    });
-    chart.update();
-  });
-}
 
 function setupCharts() {
   // Initialize charts for each canvas
@@ -61,7 +34,7 @@ function initializeChart(canvasId, maxDataPoints) {
           label: `${canvasId}`,
           data: [],
           borderWidth: 1,
-          borderColor: "#79DDE6", // Chart line color
+          borderColor: "#0A1572", // Chart line color
           backgroundColor: "transparent",
         },
       ],
@@ -70,7 +43,7 @@ function initializeChart(canvasId, maxDataPoints) {
       scales: {
         x: {
           ticks: {
-            color: "#79DDE6", // Tick label color
+            color: "#0A1572", // Tick label color
           },
           grid: {
             drawOnChartArea: false,
@@ -82,16 +55,16 @@ function initializeChart(canvasId, maxDataPoints) {
         },
         y: {
           grid: {
-            color: "#37474F",
+            color: "#0A1572",
           },
           ticks: {
-            color: "#000000",
+            color: "#0A1572",
           },
         },
       },
       legend: {
         labels: {
-          fontColor: "#000000", // Adjust legend label color for dark theme
+          fontColor: "#0A1572", // Adjust legend label color for dark theme
         },
       },
       elements: {
@@ -104,26 +77,20 @@ function initializeChart(canvasId, maxDataPoints) {
       },
     },
   });
-  chart.update();
 
-  // const watchID = getWatchID();
-  // if (watchID == null) {
-  //   showToast("Cannot show chart as WatchID is not provided ", "info");
-  // }
-
-  // currentListener = "mqtt_data_" + canvasId + "_" + watchID;
-  // socket.on(currentListener, function (msg) {
-  //   var time = new Date().toLocaleTimeString();
-  //   if (chart.data.labels.length >= maxDataPoints) {
-  //     chart.data.labels.shift(); // Remove the oldest label
-  //     chart.data.datasets.forEach((dataset) => {
-  //       dataset.data.shift(); // Remove the oldest data point
-  //     });
-  //   }
-  //   chart.data.labels.push(time);
-  //   chart.data.datasets.forEach((dataset) => {
-  //     dataset.data.push(msg.data);
-  //   });
-  //   chart.update();
-  // });
+  currentListener = "mqtt_data_" + canvasId;
+  socket.on(currentListener, function (msg) {
+    var time = new Date().toLocaleTimeString();
+    if (chart.data.labels.length >= maxDataPoints) {
+      chart.data.labels.shift(); // Remove the oldest label
+      chart.data.datasets.forEach((dataset) => {
+        dataset.data.shift(); // Remove the oldest data point
+      });
+    }
+    chart.data.labels.push(time);
+    chart.data.datasets.forEach((dataset) => {
+      dataset.data.push(msg.data);
+    });
+    chart.update();
+  });
 }

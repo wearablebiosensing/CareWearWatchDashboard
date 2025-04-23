@@ -382,8 +382,6 @@ def sendToChart(data_type: str, batch_data: list[str], watchID: str):
         data = line.split(",")
         ax = data[0]
         ax_float_value = float(ax)
-        print("Emmiting the following data to  socketio.emit: ")
-        print(f'mqtt_data_{data_type}_{watchID}', {'data': ax_float_value})
         socketio.emit(f'mqtt_data_{data_type}_{watchID}', {'data': ax_float_value})
 
 

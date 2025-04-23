@@ -54,6 +54,7 @@
   }
   .participant-form {
     margin-bottom: 20px;
+    align-self: center;
   }
   .participant-form label {
     margin-right: 10px;
@@ -80,6 +81,7 @@
   }
   .participant-form button:hover {
     background-color: #1c5bbf;
+    align-self: center;
   }
   /* Layout for activity buttons */
   .activity-container {
